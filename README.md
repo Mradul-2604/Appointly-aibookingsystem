@@ -4,7 +4,10 @@
 
 ## Tech Stack
 - **Frontend**: React 19, Vite, Tailwind CSS, Framer Motion, Clerk Auth.
-- **Backend**: Python Flask, Google Gemini 2.5 Flash, Supabase Python SDK.
+- **Backend**: Python Flask, Supabase Python SDK.
+- **AI Infrastructure**: 
+  - **Development Phase**: Claude 4.6 Sonnet (Systems design, code generation, and complex reasoning).
+  - **Production Runtime**: Google Gemini 2.5 Flash (Conversational NLU and real-time processing).
 - **Database**: Supabase (PostgreSQL).
 - **Notifications**: SMTP/Email Integration for automated alerts.
 
@@ -16,7 +19,7 @@
 - Node.js (v18+)
 - Python (3.9+)
 - Supabase Project & Clerk Application
-- Google Gemini API Key
+- Google Gemini API Key (Production) 
 
 ### Backend Setup
 1. `cd backend`
@@ -51,7 +54,7 @@ It can be said that the above system makes appointment booking very easy.
 The application follows a modern cloud-native architecture:
 - **Frontend**: A React application bootstrapped with Vite, using Tailwind CSS for a premium "Glassmorphism" UI and Framer Motion for micro-animations.
 - **Backend**: A Python Flask REST API that handles session management, business logic, and integration with the LLM.
-- **AI Engine**: Google Gemini (using the Generative AI Python SDK) processes natural language to extract structured booking data.
+- **AI Engine**: Hybrid implementation leveraging **Claude 4.6 Sonnet** for the initial structural design and **Gemini 2.5 Flash** for fast, cost-effective runtime inference.
 - **Database**: Supabase (PostgreSQL) stores structured data such as user profiles, appointment slots, and real-time availability.
 - **Notification Layer**: Automated email triggers to notify users and admins of status changes.
 
@@ -89,12 +92,16 @@ The core NLU logic utilizes a sophisticated **System Prompt** that enforces:
 
 ## Part 3: Implementation (AI-Assisted)
 
-### AI Model Used
-- **Model**: `gemini-2.5-flash`
-- **Reason for Selection**: 
-    - **Speed**: Flash models provide the near-instant response times required for a conversational UI.
+### AI Model & Development
+- **Development & Reasoning**: **Claude 4.6 Sonnet** (Primary logic designer)
+    - Used for architecture design, complex algorithm implementation (stable slot allocation), and front-end layout optimization.
+- **Production Runtime**: **Google Gemini 2.5 Flash**
+    - **Speed**: Flash models provide the near-instant response times (~1s) required for a conversational UI.
     - **Reliability**: Exceptional at following strict JSON formatting instructions without "hallucinating" extra markdown.
     - **Context Window**: Allows for deep conversational history (resumes where the user left off) without performance degradation.
+- **Development Environment**: 
+    - **IDE**: Visual Studio Code.
+    - **AI Assistant**: Developed using Claude Code (Advanced AI Coding Assistant).
 - **Tokens Used**:
     - **Input Tokens**: ~1,200 per message (including system instructions + history).
     - **Output Tokens**: ~150 per message (compact JSON response).
