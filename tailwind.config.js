@@ -1,0 +1,73 @@
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
+  darkMode: "class",
+  theme: {
+      extend: {
+          "colors": {
+              "primary-fixed": "#e2dfff",
+              "outline": "#777587",
+              "on-primary": "#ffffff",
+              "surface-container-high": "#e7e8e9",
+              "on-secondary-fixed": "#140f54",
+              "on-secondary": "#ffffff",
+              "on-error": "#ffffff",
+              "on-primary-container": "#dad7ff",
+              "on-tertiary-fixed": "#351000",
+              "surface-container-lowest": "#ffffff",
+              "error-container": "#ffdad6",
+              "on-error-container": "#93000a",
+              "surface-dim": "#d9dadb",
+              "on-tertiary": "#ffffff",
+              "on-tertiary-container": "#ffd2be",
+              "on-background": "#191c1d",
+              "surface-container-highest": "#e1e3e4",
+              "error": "#ba1a1a",
+              "secondary-fixed": "#e2dfff",
+              "on-surface": "#191c1d",
+              "secondary": "#58579b",
+              "inverse-primary": "#c3c0ff",
+              "tertiary": "#7e3000",
+              "secondary-fixed-dim": "#c3c0ff",
+              "surface-container-low": "#f3f4f5",
+              "on-secondary-container": "#454386",
+              "on-tertiary-fixed-variant": "#7b2f00",
+              "inverse-on-surface": "#f0f1f2",
+              "background": "#f8f9fa",
+              "tertiary-fixed": "#ffdbcc",
+              "secondary-container": "#b6b4ff",
+              "on-surface-variant": "#464555",
+              "tertiary-fixed-dim": "#ffb695",
+              "on-primary-fixed": "#0f0069",
+              "surface-tint": "#4d44e3",
+              "tertiary-container": "#a44100",
+              "surface": "#f8f9fa",
+              "primary": "#3525cd",
+              "on-secondary-fixed-variant": "#413f82",
+              "primary-container": "#4f46e5",
+              "outline-variant": "#c7c4d8",
+              "surface-bright": "#f8f9fa",
+              "inverse-surface": "#2e3132",
+              "on-primary-fixed-variant": "#3323cc",
+              "primary-fixed-dim": "#c3c0ff",
+              "surface-variant": "#e1e3e4",
+              "surface-container": "#edeeef"
+          },
+          "borderRadius": {
+              "DEFAULT": "0.25rem",
+              "lg": "0.5rem",
+              "xl": "1.5rem",
+              "full": "9999px"
+          },
+          "fontFamily": {
+              "headline": ["Inter", "sans-serif"],
+              "body": ["Inter", "sans-serif"],
+              "label": ["Inter", "sans-serif"]
+          }
+      },
+  },
+  plugins: [],
+}
