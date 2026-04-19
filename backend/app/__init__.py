@@ -7,10 +7,7 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
-    # Configure CORS - accessible dynamically via Config in prod
-    CORS(app, resources={r"/*": {
-        "origins": Config.ALLOWED_ORIGINS
-    }}, supports_credentials=True, methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
+    # CORS is now handled in run.py as per production requirements
 
     limiter.init_app(app)
 
