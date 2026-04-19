@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth, useUser, UserButton, useClerk } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
 
-const API = 'http://localhost:5000/api';
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API = `${API_BASE}/api`;
 
 export default function Chat() {
     const { isLoaded, userId, getToken } = useAuth();
@@ -27,11 +28,11 @@ export default function Chat() {
                 content: `Hello, ${user?.firstName || 'there'}. I'm here to help you schedule an appointment with the doctor. Could you tell me what brings you in today and when you'd like to come?`
             }]);
             // Silently sync profile — ensures Supabase row exists before first message
-            getToken().then(token => {
-                fetch('http://localhost:5000/api/appointments?limit=1', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                }).catch(() => {});
-            });
+                getToken().then(token => {
+                    fetch(`${API_BASE}/api/appointments?limit=1`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    }).catch(() => {});
+                });
         }
     }, [isLoaded, userId, user]);
 
@@ -120,7 +121,7 @@ export default function Chat() {
         setIsTyping(true);
 
         try {
-            const res = await fetch('http://localhost:5000/chat', {
+            const res = await fetch(`${API_BASE}/chat`, {
                 method: 'POST',
                 headers: await authHeaders(),
                 body: JSON.stringify({ message: inputText })

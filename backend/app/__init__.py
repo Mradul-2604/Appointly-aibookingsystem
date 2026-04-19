@@ -9,7 +9,7 @@ def create_app():
 
     # Configure CORS - accessible dynamically via Config in prod
     CORS(app, resources={r"/*": {
-        "origins": ["http://localhost:3000", "http://localhost:5173", "http://localhost:5174"]
+        "origins": Config.ALLOWED_ORIGINS
     }}, supports_credentials=True, methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
 
     limiter.init_app(app)
@@ -24,6 +24,10 @@ def create_app():
     app.register_blueprint(admin_bp, url_prefix='/admin')
     app.register_blueprint(booking_bp, url_prefix='/api')
     app.register_blueprint(chat_bp, url_prefix='/chat')
+
+    @app.route('/')
+    def home():
+        return jsonify({"message": "Backend running", "status": "active"}), 200
 
     @app.errorhandler(429)
     def ratelimit_handler(e):

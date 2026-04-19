@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth, useUser, UserButton, useClerk } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
 
-const API = 'http://localhost:5000/api';
+const API = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api`;
 
 const STATUS_STYLES = {
     confirmed:   { bg: 'bg-green-100 text-green-800',  icon: 'check_circle' },
