@@ -20,5 +20,6 @@ class Config:
     SMTP_PORT = int(os.getenv("SMTP_PORT", 587))
     SMTP_EMAIL = os.getenv("SMTP_EMAIL") or os.getenv("SMTP_USER")
     SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
+    SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY")
     
     ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:5173,http://localhost:5174").split(",")

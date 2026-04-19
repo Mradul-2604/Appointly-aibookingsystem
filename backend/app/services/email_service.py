@@ -1,29 +1,34 @@
-import smtplib
 import threading
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 from app.config import Config
 
 
 def _send_sync(to_email: str, subject: str, html: str):
-    if not Config.SMTP_EMAIL or not Config.SMTP_PASSWORD:
-        print(f"[email] SMTP not configured — skipping email to {to_email}")
+    if not Config.SENDGRID_API_KEY:
+        print(f"[email] SendGrid API Key not configured — skipping email to {to_email}")
         return
+    
+    if not Config.SMTP_EMAIL:
+        print(f"[email] Sender email (SMTP_EMAIL) not configured — skipping email to {to_email}")
+        return
+
     try:
-        msg = MIMEMultipart("alternative")
-        msg["Subject"] = subject
-        msg["From"] = f"Appointly <{Config.SMTP_EMAIL}>"
-        msg["To"] = to_email
-        msg.attach(MIMEText(html, "html"))
+        message = Mail(
+            from_email=Config.SMTP_EMAIL,
+            to_emails=to_email,
+            subject=subject,
+            html_content=html
+        )
+        sg = SendGridAPIClient(Config.SENDGRID_API_KEY)
+        response = sg.send(message)
         
-        # Using port 587 with STARTTLS for better cloud compatibility
-        with smtplib.SMTP("smtp.gmail.com", 587) as server:
-            server.starttls()
-            server.login(Config.SMTP_EMAIL, Config.SMTP_PASSWORD)
-            server.sendmail(Config.SMTP_EMAIL, to_email, msg.as_string())
-        print(f"[email] Sent '{subject}' to {to_email}")
+        if response.status_code >= 200 and response.status_code < 300:
+            print(f"[email] Sent '{subject}' to {to_email} via SendGrid")
+        else:
+            print(f"[email] SendGrid returned status code {response.status_code}")
     except Exception as e:
-        print(f"[email] Failed: {e}")
+        print(f"[email] SendGrid Failed: {e}")
 
 
 def _send(to_email: str, subject: str, html: str):
