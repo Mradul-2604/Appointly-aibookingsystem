@@ -1,10 +1,11 @@
 import smtplib
+import threading
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from app.config import Config
 
 
-def _send(to_email: str, subject: str, html: str):
+def _send_sync(to_email: str, subject: str, html: str):
     if not Config.SMTP_EMAIL or not Config.SMTP_PASSWORD:
         print(f"[email] SMTP not configured — skipping email to {to_email}")
         return
@@ -14,12 +15,22 @@ def _send(to_email: str, subject: str, html: str):
         msg["From"] = f"Appointly <{Config.SMTP_EMAIL}>"
         msg["To"] = to_email
         msg.attach(MIMEText(html, "html"))
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+        
+        # Using port 587 with STARTTLS for better cloud compatibility
+        with smtplib.SMTP("smtp.gmail.com", 587) as server:
+            server.starttls()
             server.login(Config.SMTP_EMAIL, Config.SMTP_PASSWORD)
             server.sendmail(Config.SMTP_EMAIL, to_email, msg.as_string())
         print(f"[email] Sent '{subject}' to {to_email}")
     except Exception as e:
         print(f"[email] Failed: {e}")
+
+
+def _send(to_email: str, subject: str, html: str):
+    """Sends the email in a background thread to prevent blocking headers."""
+    thread = threading.Thread(target=_send_sync, args=(to_email, subject, html))
+    thread.daemon = True
+    thread.start()
 
 
 def _wrap(content: str) -> str:
