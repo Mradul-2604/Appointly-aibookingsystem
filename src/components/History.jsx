@@ -17,6 +17,7 @@ export default function History() {
     const [appointments, setAppointments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -56,53 +57,79 @@ export default function History() {
         return `${date}${t ? ' at ' + t : ''}`;
     };
 
+    const SidebarContent = () => (
+        <>
+            <div className="flex items-center gap-3 px-2 py-4 mb-2">
+                <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-on-primary shadow-lg shadow-primary/20">
+                    <span className="material-symbols-outlined">auto_awesome</span>
+                </div>
+                <div>
+                    <h1 className="text-lg font-bold text-[#191c1d] leading-tight">Appointly</h1>
+                    <p className="text-[10px] uppercase tracking-widest text-on-surface-variant font-semibold">AI Booking System</p>
+                </div>
+            </div>
+            <nav className="flex-1 space-y-1 mt-4">
+                <button onClick={() => { navigate('/chat'); setSidebarOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2.5 text-[#191c1d]/70 hover:bg-white/50 rounded-xl transition-all duration-200">
+                    <span className="material-symbols-outlined">chat_bubble</span>
+                    <span className="text-sm">Schedule Assistant</span>
+                </button>
+                <button onClick={() => { navigate('/history'); setSidebarOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2.5 bg-white text-[#4F46E5] rounded-xl shadow-sm font-semibold transition-all duration-200">
+                    <span className="material-symbols-outlined" style={{fontVariationSettings: "'FILL' 1"}}>history</span>
+                    <span className="text-sm">History</span>
+                </button>
+            </nav>
+            <div className="pt-4 border-t border-outline-variant/20 flex flex-col gap-1">
+                <div className="flex items-center gap-3 px-2 py-2">
+                    <UserButton appearance={{ elements: { userButtonAvatarBox: "w-10 h-10" } }} />
+                    <div className="flex-1 overflow-hidden">
+                        <p className="text-sm font-bold truncate">{user?.fullName || 'User'}</p>
+                        <p className="text-[10px] text-outline truncate">{user?.primaryEmailAddress?.emailAddress || ''}</p>
+                    </div>
+                </div>
+                <button
+                    onClick={() => signOut({ redirectUrl: '/' })}
+                    className="flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-100 rounded-xl transition-colors w-full"
+                >
+                    <span className="material-symbols-outlined text-[18px]">logout</span>
+                    Sign out
+                </button>
+            </div>
+        </>
+    );
+
     return (
         <div className="bg-surface text-on-surface antialiased overflow-hidden h-screen">
             <div className="flex h-full w-full">
-                <aside className="flex flex-col h-full p-4 gap-2 bg-[#f3f4f5] dark:bg-slate-900 w-64 fixed left-0 top-0 font-['Inter'] z-50">
-                    <div className="flex items-center gap-3 px-2 py-4 mb-2">
-                        <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-on-primary shadow-lg shadow-primary/20">
-                            <span className="material-symbols-outlined">auto_awesome</span>
-                        </div>
-                        <div>
-                            <h1 className="text-lg font-bold text-[#191c1d] leading-tight">Appointly</h1>
-                            <p className="text-[10px] uppercase tracking-widest text-on-surface-variant font-semibold">AI Booking System</p>
-                        </div>
-                    </div>
-                    <nav className="flex-1 space-y-1 mt-4">
-                        <button onClick={() => navigate('/chat')} className="w-full flex items-center gap-3 px-3 py-2.5 text-[#191c1d]/70 hover:bg-white/50 rounded-xl transition-all duration-200">
-                            <span className="material-symbols-outlined">chat_bubble</span>
-                            <span className="text-sm">Schedule Assistant</span>
-                        </button>
-                        <button onClick={() => navigate('/history')} className="w-full flex items-center gap-3 px-3 py-2.5 bg-white text-[#4F46E5] rounded-xl shadow-sm font-semibold transition-all duration-200">
-                            <span className="material-symbols-outlined" style={{fontVariationSettings: "'FILL' 1"}}>history</span>
-                            <span className="text-sm">History</span>
-                        </button>
-                    </nav>
-                    <div className="pt-4 border-t border-outline-variant/20 flex flex-col gap-1">
-                        <div className="flex items-center gap-3 px-2 py-2">
-                            <UserButton appearance={{ elements: { userButtonAvatarBox: "w-10 h-10" } }} />
-                            <div className="flex-1 overflow-hidden">
-                                <p className="text-sm font-bold truncate">{user?.fullName || 'User'}</p>
-                                <p className="text-[10px] text-outline truncate">{user?.primaryEmailAddress?.emailAddress || ''}</p>
-                            </div>
-                        </div>
-                        <button
-                            onClick={() => signOut({ redirectUrl: '/' })}
-                            className="flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-100 rounded-xl transition-colors w-full"
-                        >
-                            <span className="material-symbols-outlined text-[18px]">logout</span>
-                            Sign out
-                        </button>
-                    </div>
+                {/* Mobile overlay */}
+                {sidebarOpen && (
+                    <div
+                        className="md:hidden fixed inset-0 bg-black/40 z-40"
+                        onClick={() => setSidebarOpen(false)}
+                    />
+                )}
+
+                {/* Desktop Sidebar */}
+                <aside className="hidden md:flex flex-col h-full p-4 gap-2 bg-[#f3f4f5] w-64 fixed left-0 top-0 font-['Inter'] z-50">
+                    <SidebarContent />
                 </aside>
 
-                <main className="ml-64 flex-1 flex flex-col h-screen bg-surface">
-                    <header className="h-16 flex items-center px-8 bg-surface-container-low/50 backdrop-blur-md z-40 border-b border-outline-variant/10">
-                        <h2 className="text-title-sm font-semibold text-on-surface">Appointment History</h2>
+                {/* Mobile Sidebar Drawer */}
+                <aside className={`md:hidden flex flex-col h-full p-4 gap-2 bg-[#f3f4f5] w-72 fixed left-0 top-0 font-['Inter'] z-50 transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+                    <SidebarContent />
+                </aside>
+
+                <main className="md:ml-64 flex-1 flex flex-col h-screen bg-surface">
+                    <header className="h-14 md:h-16 flex items-center px-4 md:px-8 bg-surface-container-low/50 backdrop-blur-md z-40 border-b border-outline-variant/10 gap-3">
+                        <button
+                            onClick={() => setSidebarOpen(true)}
+                            className="md:hidden p-2 rounded-xl hover:bg-surface-container transition-colors text-on-surface"
+                        >
+                            <span className="material-symbols-outlined">menu</span>
+                        </button>
+                        <h2 className="text-base md:text-title-sm font-semibold text-on-surface">Appointment History</h2>
                     </header>
 
-                    <section className="flex-1 overflow-y-auto px-8 py-8">
+                    <section className="flex-1 overflow-y-auto px-4 md:px-8 py-6 md:py-8">
                         {loading && (
                             <div className="flex items-center gap-3 text-outline">
                                 <span className="material-symbols-outlined animate-spin">progress_activity</span>
@@ -131,18 +158,18 @@ export default function History() {
                                     const svc  = appt.services || {};
                                     const style = STATUS_STYLES[appt.status] || STATUS_STYLES.confirmed;
                                     return (
-                                        <div key={appt.id} className="p-5 bg-surface-container-lowest rounded-xl border border-outline-variant/10 shadow-sm flex items-center gap-5">
-                                            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                                                <span className="material-symbols-outlined text-primary" style={{fontVariationSettings: "'FILL' 1"}}>
+                                        <div key={appt.id} className="p-4 md:p-5 bg-surface-container-lowest rounded-xl border border-outline-variant/10 shadow-sm flex items-center gap-4 md:gap-5">
+                                            <div className="w-9 h-9 md:w-10 md:h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                                                <span className="material-symbols-outlined text-primary text-[18px]" style={{fontVariationSettings: "'FILL' 1"}}>
                                                     {style.icon}
                                                 </span>
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <p className="font-semibold text-on-surface truncate">{svc.name || 'Appointment'}</p>
-                                                <p className="text-sm text-outline mt-0.5">{fmt(slot.date, slot.start_time)}</p>
+                                                <p className="font-semibold text-on-surface truncate text-sm md:text-base">{svc.name || 'Appointment'}</p>
+                                                <p className="text-xs md:text-sm text-outline mt-0.5">{fmt(slot.date, slot.start_time)}</p>
                                                 {appt.notes && <p className="text-xs text-outline/70 mt-1 truncate">Note: {appt.notes}</p>}
                                             </div>
-                                            <span className={`px-3 py-1 rounded-full text-xs font-semibold capitalize ${style.bg}`}>
+                                            <span className={`px-2 md:px-3 py-1 rounded-full text-xs font-semibold capitalize whitespace-nowrap ${style.bg}`}>
                                                 {appt.status}
                                             </span>
                                         </div>

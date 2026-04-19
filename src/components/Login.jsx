@@ -6,6 +6,8 @@ export default function Login() {
     const { isLoaded, signIn, setActive } = useSignIn();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [verifying, setVerifying] = useState(false);
+    const [code, setCode] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
@@ -34,8 +36,24 @@ export default function Login() {
             if (result.status === 'complete') {
                 await setActive({ session: result.createdSessionId });
                 navigate('/auth-redirect');
-            } else {
-                console.log(JSON.stringify(result, null, 2));
+            } else if (result.status === 'needs_second_factor') {
+                // Clerk wants an email code - prepare it and show code screen
+                await signIn.prepareSecondFactor({ strategy: 'email_code' });
+                setVerifying(true);
+            } else if (result.status === 'needs_first_factor') {
+                // Try email_code strategy as first factor
+                const emailCodeFactor = result.supportedFirstFactors?.find(
+                    f => f.strategy === 'email_code'
+                );
+                if (emailCodeFactor) {
+                    await signIn.prepareFirstFactor({
+                        strategy: 'email_code',
+                        emailAddressId: emailCodeFactor.emailAddressId,
+                    });
+                    setVerifying(true);
+                } else {
+                    setError('This account requires a different sign-in method. Try Google sign-in.');
+                }
             }
         } catch (err) {
             setError(err.errors ? err.errors[0].longMessage : err.message);
@@ -44,9 +62,91 @@ export default function Login() {
         }
     };
 
+    const handleVerifyCode = async (e) => {
+        e.preventDefault();
+        if (!isLoaded) return;
+        setLoading(true);
+        setError(null);
+        try {
+            const result = await signIn.attemptSecondFactor({
+                strategy: 'email_code',
+                code,
+            });
+            if (result.status === 'complete') {
+                await setActive({ session: result.createdSessionId });
+                navigate('/auth-redirect');
+            } else {
+                setError('Verification failed. Please try again.');
+            }
+        } catch (err) {
+            // Try first factor if second factor fails
+            try {
+                const result = await signIn.attemptFirstFactor({
+                    strategy: 'email_code',
+                    code,
+                });
+                if (result.status === 'complete') {
+                    await setActive({ session: result.createdSessionId });
+                    navigate('/auth-redirect');
+                } else {
+                    setError('Verification failed. Please try again.');
+                }
+            } catch (err2) {
+                setError(err2.errors ? err2.errors[0].longMessage : err2.message);
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+
+
+    // Show verification code screen if Clerk needs a code
+    if (verifying) {
+        return (
+            <div className="bg-surface font-body text-on-surface min-h-screen flex items-center justify-center p-6">
+                <div className="w-full max-w-md p-8 bg-surface-container-lowest rounded-2xl shadow-xl border border-outline-variant/10 text-center">
+                    <div className="w-12 h-12 primary-gradient rounded-xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                        <span className="material-symbols-outlined text-on-primary">mark_email_unread</span>
+                    </div>
+                    <h2 className="text-2xl font-semibold text-on-surface mb-2">Check your email</h2>
+                    <p className="text-on-surface-variant text-sm leading-relaxed mb-8">
+                        We've sent a verification code to <strong>{email}</strong>. Please enter it below to continue.
+                    </p>
+                    {error && (
+                        <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-xl text-sm font-medium border border-red-100">
+                            {error}
+                        </div>
+                    )}
+                    <form onSubmit={handleVerifyCode} className="space-y-4">
+                        <input
+                            className="w-full bg-surface-container-low border-none rounded-xl px-4 py-4 text-center text-2xl font-bold tracking-[0.5em] focus:ring-2 focus:ring-primary/20 transition-all outline-none"
+                            placeholder="000000"
+                            value={code}
+                            onChange={(e) => setCode(e.target.value)}
+                            autoFocus
+                        />
+                        <button
+                            className="w-full primary-gradient text-on-primary font-semibold py-3 rounded-xl shadow-lg active:scale-[0.98] transition-all disabled:opacity-70"
+                            type="submit"
+                            disabled={loading || !code}
+                        >
+                            {loading ? 'Verifying...' : 'Verify & Sign In'}
+                        </button>
+                    </form>
+                    <button
+                        onClick={() => { setVerifying(false); setCode(''); setError(null); }}
+                        className="mt-4 text-sm text-outline hover:text-on-surface transition-colors"
+                    >
+                        ← Back to login
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
     return (
-        <div className="bg-background text-on-background h-screen overflow-hidden flex items-center justify-center p-6">
-            <main className="w-full max-w-4xl grid grid-cols-1 lg:grid-cols-2 bg-surface-container-lowest rounded-2xl overflow-hidden shadow-xl" style={{minHeight: 0}}>
+        <div className="bg-background text-on-background min-h-screen flex items-center justify-center p-4 sm:p-6">
+            <main className="w-full max-w-4xl grid grid-cols-1 lg:grid-cols-2 bg-surface-container-lowest rounded-2xl overflow-hidden shadow-xl">
                 <section className="hidden lg:flex flex-col justify-center p-10 bg-surface-container-low relative overflow-hidden">
                     <div className="absolute top-[-10%] right-[-10%] w-96 h-96 rounded-full bg-primary/5 blur-3xl"></div>
                     <div className="z-10">
@@ -66,7 +166,14 @@ export default function Login() {
                         </div>
                     </div>
                 </section>
-                <section className="flex flex-col justify-center items-center px-8 py-8 bg-surface-container-lowest">
+                <section className="flex flex-col justify-center items-center px-6 py-10 sm:px-8 bg-surface-container-lowest">
+                    {/* Mobile logo */}
+                    <div className="flex lg:hidden items-center gap-3 mb-8 self-start">
+                        <div className="w-9 h-9 primary-gradient rounded-xl flex items-center justify-center shadow-lg">
+                            <span className="material-symbols-outlined text-on-primary text-[18px]">auto_awesome</span>
+                        </div>
+                        <span className="text-lg font-bold tracking-tight text-on-surface">Appointly</span>
+                    </div>
                     <div className="w-full max-w-[400px]">
                         <header className="mb-6">
                             <h2 className="text-2xl font-semibold text-on-surface mb-1">Welcome back</h2>
@@ -151,3 +258,6 @@ export default function Login() {
         </div>
     );
 }
+
+
+
